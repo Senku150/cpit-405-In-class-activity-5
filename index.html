@@ -4,35 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JS Events Activity</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>When2Meet</title>
+    <link href="styles.css" rel="stylesheet">
+    <script src="script.js" defer></script>
 </head>
 
 <body>
-    <h1>NBA Title Quiz</h1>
-    <input type="text" id="teamInput" placeholder="Enter an NBA team name">
-    <table>
-        <thead>
-            <tr>
-                <th colspan="2">Teams that have won NBA titles</th>
-            </tr>
-            <tr>
-                <th>Team</th>
-                <th>Years</th>
-            </tr>
-        </thead>
-        <tbody id="wonTableBody"></tbody>
-    </table>
+    <h1>When2Meet</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Teams that have never won an NBA title</th>
-            </tr>
-        </thead>
-        <tbody id="neverWonTableBody"></tbody>
-    </table>
-    <script src="script.js"></script>
+    <div class="meeting-info">
+        <label for="event">Event Name:</label>
+        <input type="text" id="event-name" placeholder="Enter Event Name" required>
+        <label for="name">Your Name:</label>
+        <input type="text" id="user-name" placeholder="Your name" required>
+        <label for="start-time">No earlier than</label>
+        <select id="start-time"></select>
+        <label for="end-time">No later than</label>
+        <select id="end-time"></select>
+    </div>
+
+    <div class="time-table" id="timeTable">
+        <!-- Table will be generated in JS -->
+    </div>
+    <div id="create-event">
+        <button id="submitMeeting">Create Event</button>
+    </div>
+
 </body>
 
 </html>

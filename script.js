@@ -1,68 +1,120 @@
-const nbaTeams = {
-    won: {
-        "Boston Celtics": [1957, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1968, 1969, 1974, 1976, 1981, 1984, 1986, 2008, 2024],
-        "Los Angeles Lakers": [1949, 1950, 1952, 1953, 1954, 1972, 1980, 1982, 1985, 1987, 1988, 2000, 2001, 2002, 2009, 2010, 2020],
-        "Golden State Warriors": [1947, 1956, 1975, 2015, 2017, 2018, 2022],
-        "Chicago Bulls": [1991, 1992, 1993, 1996, 1997, 1998],
-        "San Antonio Spurs": [1999, 2003, 2005, 2007, 2014],
-        "Philadelphia 76ers": [1955, 1967, 1983],
-        "Detroit Pistons": [1989, 1990, 2004],
-        "Miami Heat": [2006, 2012, 2013],
-        "Milwaukee Bucks": [1971, 2021],
-        "Houston Rockets": [1994, 1995],
-        "New York Knicks": [1970, 1973],
-        "Toronto Raptors": [2019],
-        "Cleveland Cavaliers": [2016],
-        "Dallas Mavericks": [2011],
-        "Portland Trail Blazers": [1977],
-        "Washington Wizards": [1978],
-        "Seattle SuperSonics": [1979],
-        "Atlanta Hawks": [1958],
-        "Sacramento Kings": [1951],
-        "Denver Nuggets": [2023]
-    },
-    neverWon: { //or I can just use nbaTeams.neverWon.includes("")
-        "Phoenix Suns":0,
-        "Utah Jazz":0,
-        "Brooklyn Nets":0,
-        "Orlando Magic":0,
-        "Indiana Pacers":0,
-        "Charlotte Hornets":0,
-        "Minnesota Timberwolves":0,
-        "Memphis Grizzlies":0,
-        "New Orleans Pelicans":0,
-        "Los Angeles Clippers":0,
-        "Oklahoma City Thunder":0
-}
-};
+let sTime = document.getElementById('start-time')
+let eTime = document.getElementById('end-time')
 
-const choosenTeam = document.getElementById("teamInput");
-const wonTable = document.getElementById("wonTableBody")
-const neverWonTable = document.getElementById("neverWonTableBody")
+let sHour = 8;
+let eHour = 17;
 
+loadTheBody(sTime,8)
+loadTheBody(eTime,17)
 
-let handleEnter = (key) => {
-    if (key.key === 'Enter') {
-        console.log("hit enter")
-        let teamName = choosenTeam.value;
-        console.log(teamName);
-        addTeamRow(teamName);
+function loadTheBody(body,value){
+    let i =0;
+    while(i!=24){
+        let oElement = document.createElement("option");
+        let hour = i % 12 === 0 ? 12: i%12;
+        hour += ":00"
+        hour += i<12 ? " AM": " PM"
+        hour = hour=="12:00 PM" ? "0:00 PM": hour
+        i++;
+        oElement.text=hour;
+        oElement.value=i;
+        if(i === value){
+            oElement.selected=true;
+        }
+        body.appendChild(oElement)
     }
 }
-choosenTeam.addEventListener("keyup", handleEnter);
+sTime.addEventListener("change",function(){
+    sHour= parseInt(this.value)
+    createTable();
+})
+
+eTime.addEventListener("change",function(){
+    eHour= parseInt(this.value)
+    createTable();
+})
 
 
-function addTeamRow(team) {
-    if (nbaTeams.won.hasOwnProperty(team)) {
-    const raw = wonTable?.insertRow() //the ? sign is for me declearing wonTable is defnitly not null  Note: this is not a very good approach but get the things done
-    raw.insertCell(0).innerText =team;
-    raw.insertCell(1).innerText =nbaTeams.won[team].join(", ");
-    }
-    else if (nbaTeams.neverWon.hasOwnProperty(team)){
-        const raw = neverWonTable?.insertRow() //the ? sign is for me declearing wonTable is defnitly not null  Note: this is not a very good approach but get the things done
-        raw.insertCell(0).innerText =team;
+function createTable(){
+   const divElement = document.getElementById("timeTable");
+   let tableHTML = `<table><thead><tr><th>time</th>`
+
+   const days= ["Sun","Mon","Tuse","wen","thu","fri","sat"]
+   days.forEach(day => {
+    tableHTML += `<th class = "day th">${day}</th>`
+   })
+   tableHTML +=`</th></tr></thead><tbody>`
+   for (let l=sHour;l<=eHour;l++){
+    
+    let hour = (l-1) % 12 === 0 ? 12: (l-1)%12;
+    hour += ":00"
+    hour += (l-1)<12 ? " AM": " PM"
+    hour = hour=="12:00 PM" ? "0:00 PM": hour
+
+    tableHTML += `<tr> <td class=time-lable>${hour}</td>`
+    days.forEach(day => {
+        tableHTML += `<th class ="time-slot"
+        onclick="toggle(this)"
+        data-day ="${day}"
+        hour-time= "${hour}">
+        </th>`
+       })
+   }
+   tableHTML += `</tbody></table>`
+   divElement.innerHTML= tableHTML;
+}
+
+function toggle(e){
+    const getClasses =e.classList
+    if(getClasses.length==1){
+    e.classList.add("selected")
     }
     else{
-        alert("no team with that name exist !!")
+        e.classList.remove("selected")
     }
 }
+
+createTable();
+
+
+const submitE = document.getElementById("submitMeeting")
+
+
+
+async function handleAPI(){
+    const eventName= document.getElementById("event-name")
+    const personName = document.getElementById("user-name")
+    if(eventName.value=="" || personName.value ==""){
+        alert("please enter your name and the event name")
+        eventName.focus()
+    }
+    else{
+        const seletedTimes = document.querySelectorAll(".selected")
+        let daysHoursPayload=""
+        for(let e of seletedTimes){
+            daysHoursPayload +="\n"+ e.getAttribute("data-day") +" "
+            daysHoursPayload +=e.getAttribute("hour-time")+" "
+        }
+
+        const payload={
+            name: personName.value,
+            eventName: eventName.value,
+            slots: [...daysHoursPayload.split("\n")]
+        }
+        payload.slots.splice(0, 1);
+        const API_URL ="https://jsonplaceholder.typicode.com/posts"
+        const response = await fetch(API_URL,{
+            method: `POST`,
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        alert("Sucess ! \npress ok to see the response in the console")
+        console.log(data)
+    }
+
+}
+
+submitE.addEventListener("click",handleAPI)
